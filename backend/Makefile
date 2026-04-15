@@ -17,3 +17,6 @@ driver-logger:
 	
 area-tracker:
 	go run cmd/consumer/area_tracker/area_tracker.go -consumerGroup="local_cg2"
+
+ws-server:
+	go run cmd/consumer/server/server.go

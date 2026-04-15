@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uber Real-Time Tracker</title>
+    
+    <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+
+    <style>
+        body { margin: 0; padding: 0; }
+        #map { width: 100vw; height: 100vh; }
+    </style>
+</head>
+<body>
+
+    <div id="map"></div>
+
+    <script>
+        // Initialize the map
+        const map = new maplibregl.Map({
+            container: 'map',
+            style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+            center: [-63.8972, -8.7636], // Your Longitude, Latitude
+            zoom: 15 // Fixed zoom level!
+        });
+
+    let ws;
+
+    function connect() {
+        ws = new WebSocket("ws://localhost:8000/ws");
+
+        ws.onopen = function() {
+            console.log("Connected to WebSocket server");
+        };
+
+        ws.onmessage = function(event) {
+
+            const pos = JSON.parse(event.data)
+
+            const marker = new maplibregl.Marker()
+            .setLngLat([pos.Longitude, pos.Latitude])
+            .addTo(map);
+        };
+
+        ws.onclose = function() {
+            console.log("WebSocket connection closed, retrying...");
+            setTimeout(connect, 3000); // Reconnect after 3 second
+        };
+
+        ws.onerror = function(error) {
+            console.error("WebSocket error:", error);
+        };
+    }
+
+    connect();
+
+    </script>
+</body>
+</html>

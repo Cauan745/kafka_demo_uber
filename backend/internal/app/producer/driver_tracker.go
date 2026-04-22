@@ -3,16 +3,56 @@ package producerapp
 
 import (
 	"encoding/json"
-	"fmt"
 	"math/rand"
+	"os"
 
 	"github.com/cauan745/trabalho_kafka/internal/app"
 	"github.com/cauan745/trabalho_kafka/internal/kafka/producer"
 )
 
-func Start(producer *producer.KafkaProducer) {
-	// Producer code
+// driverQuantity is the amount of driver_tracker goroutine to generate
+func Start(producer *producer.KafkaProducer, driverQuantity int) {
 	producerCh := make(chan app.Driver)
+
+	endCh := make(chan bool)
+
+	for range driverQuantity {
+		generateTracker(producerCh, producer, endCh)
+	}
+
+	go producerLoop(producerCh, producer)
+
+	for end := range endCh {
+		if end {
+			driverQuantity--
+		}
+
+		if driverQuantity == 0 {
+			os.Exit(1)
+		}
+	}
+}
+
+func producerLoop(producerCh chan app.Driver, producer *producer.KafkaProducer) {
+	for pos := range producerCh {
+		// fmt.Println("Latitude:", pos.Latitude, "Longitude:", pos.Longitude)
+		//lat := fmt.Sprint("Latitude:", strconv.FormatFloat(pos.Latitude, 'f', -1, 64))
+		//long := fmt.Sprint("Longitude:", strconv.FormatFloat(pos.Longitude, 'f', -1, 64))
+		//
+
+		j, err := json.Marshal(pos)
+		if err != nil {
+			// fmt.Println("Erro ao converter Position para json")
+			continue
+		}
+		producer.Produce(string(j))
+
+		// fmt.Println(string(j))
+	}
+}
+
+func generateTracker(producerCh chan app.Driver, producer *producer.KafkaProducer, endCh chan bool) {
+	// Producer code
 
 	passengerPos := app.Position{app.GenerateRandomLatitude(), app.GenerateRandomLongitude()}
 
@@ -21,7 +61,7 @@ func Start(producer *producer.KafkaProducer) {
 		color = "#FFFFFF"
 	}
 
-	go app.IniciarTracking(producerCh, passengerPos, color)
+	go app.IniciarTracking(producerCh, passengerPos, color, endCh)
 
 	type Passenger struct {
 		Id        float64 `json:"passengerId"`
@@ -38,21 +78,4 @@ func Start(producer *producer.KafkaProducer) {
 	}
 
 	producer.Produce(string(js))
-
-	for pos := range producerCh {
-		// fmt.Println("Latitude:", pos.Latitude, "Longitude:", pos.Longitude)
-		//lat := fmt.Sprint("Latitude:", strconv.FormatFloat(pos.Latitude, 'f', -1, 64))
-		//long := fmt.Sprint("Longitude:", strconv.FormatFloat(pos.Longitude, 'f', -1, 64))
-		//
-
-		j, err := json.Marshal(pos)
-		if err != nil {
-			fmt.Println("Erro ao converter Position para json")
-			continue
-		}
-		producer.Produce(string(j))
-
-		fmt.Println(string(j))
-		fmt.Println(string(js))
-	}
 }

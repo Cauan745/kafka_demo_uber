@@ -3,11 +3,9 @@ package app
 
 import (
 	crypto "crypto/rand"
-	"encoding/json"
 	"fmt"
 	"math"
 	"math/rand"
-	"os"
 	"time"
 )
 
@@ -22,7 +20,7 @@ type Position struct {
 	Longitude float64 `json:"longitude"`
 }
 
-func IniciarTracking(ch chan<- Driver, passengerPosition Position, color string) {
+func IniciarTracking(ch chan<- Driver, passengerPosition Position, color string, endCh chan<- bool) {
 	driverId := rand.Float64() * 1000000
 
 	pos := Position{
@@ -30,33 +28,38 @@ func IniciarTracking(ch chan<- Driver, passengerPosition Position, color string)
 		Longitude: GenerateRandomLongitude(),
 	}
 
-	js, err := json.Marshal(passengerPosition)
-	if err != nil {
-		panic(err.Error())
-	}
+	//js, err := json.Marshal(passengerPosition)
+	//if err != nil {
+	//	panic(err.Error())
+	//}
 
-	fmt.Println(string(js))
+	// fmt.Println(string(js))
 
 	for {
 		time.Sleep(1 * time.Second)
 
-		pos.approximateTo(passengerPosition)
+		end := pos.approximateTo(passengerPosition)
 
 		ch <- Driver{
 			DriverId: driverId,
 			HexColor: color,
 			Position: pos,
 		}
+
+		if end {
+			endCh <- true
+			return
+		}
 	}
 }
 
 // Increments or decrecements latitude or longitude approximating to destination based on a car at 60 mph at the equator
-func (p *Position) approximateTo(destination Position) {
+func (p *Position) approximateTo(destination Position) bool {
 	latSpeed := 0.00024  // 60 mph. * 60 turns into hour speed
 	longSpeed := 0.00024 // 60 mph at equator. * 60 ...
 
 	if p.Latitude == destination.Latitude && p.Longitude == destination.Longitude {
-		os.Exit(1)
+		return true
 	}
 
 	if math.Abs(p.Latitude-destination.Latitude) < latSpeed {
@@ -74,6 +77,8 @@ func (p *Position) approximateTo(destination Position) {
 	} else if p.Longitude-destination.Longitude < 0 {
 		p.Longitude += longSpeed
 	}
+
+	return false
 }
 
 // GenerateHexColor generates a random 6-character hex color string.

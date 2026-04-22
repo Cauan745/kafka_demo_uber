@@ -28,6 +28,7 @@ func main() {
 	topic := flag.String("topic", "local_topic", "Kafka Topic Name")
 	consumerGroup := flag.String("consumerGroup", "local_cg", "Kafka Consumer Group Name")
 	host := flag.String("host", "localhost:9092", "Kafka Host Address ex: 'localhost:9092'")
+	driverQuantity := flag.Int("quantity", 1, "The quantity of drivers to simulate")
 
 	flag.Parse()
 
@@ -38,5 +39,5 @@ func main() {
 	// Start consumers
 	fmt.Println("Starting...")
 
-	producerapp.Start(s.producer)
+	producerapp.Start(s.producer, *driverQuantity)
 }

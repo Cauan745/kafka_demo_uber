@@ -9,11 +9,15 @@ stop:
 
 restart-dev: stop dev
 
+QUANTITY = 1 
+
 producer:
-	go run cmd/producer/driver_tracker.go
+	@echo "Running with QUANTITY: $(QUANTITY)"
+	go run cmd/producer/driver_tracker.go -quantity=$(QUANTITY)
 
 run-bunch-producers:
-	seq 1 300 | xargs -I {} -P 300 sh -c 'make producer >/dev/null 2>&1'
+	@echo "Running with QUANTITY: $(QUANTITY)"
+	seq 1 50 | xargs -I {} -P 50 sh -c 'make producer >/dev/null 2>&1'
 
 driver-logger:
 	go run cmd/consumer/driver_logger/driver_logger.go --consumerGroup="local_cg3"

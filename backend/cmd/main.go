@@ -57,5 +57,5 @@ func main() {
 	config.ConsumerGroup = "local_cg2"
 	go areatracker.Start(s.logger, areatracker.Area{Long: 4.3, Lat: 3.6}, *config)
 
-	producerapp.Start(s.producer)
+	producerapp.Start(s.producer, 1)
 }

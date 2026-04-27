@@ -9,8 +9,29 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func Start(port int, database string, host string, user string, password string) *sql.DB {
-	connStr := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable", user, password, host, port, database)
+type Config struct {
+	port     int
+	database string
+	host     string
+	user     string
+	password string
+}
+
+type Database struct {
+	config Config
+	DB     *sql.DB
+}
+
+func New(port int, database string, host string, user string, password string) *Database {
+	config := Config{port, database, host, user, password}
+
+	db := Database{config, config.Start()}
+
+	return &db
+}
+
+func (c Config) Start() *sql.DB {
+	connStr := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable", c.user, c.password, c.host, c.port, c.database)
 
 	fmt.Println(connStr)
 

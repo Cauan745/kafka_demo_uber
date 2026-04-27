@@ -87,7 +87,8 @@ func main() {
 
 	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
 
-	appdatabase.Start(5432, "kafka_uber", "localhost", "postgres", "password")
+	db := appdatabase.New(5432, "kafka_uber", "localhost", "postgres", "password")
+	db.CreateUserTable()
 
 	// Start consumers
 	fmt.Println("Starting...")

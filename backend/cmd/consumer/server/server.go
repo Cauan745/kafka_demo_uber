@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	consumerapp "github.com/cauan745/trabalho_kafka/internal/app/consumer"
+	appdatabase "github.com/cauan745/trabalho_kafka/internal/app/database"
 	"github.com/cauan745/trabalho_kafka/internal/kafka/shared"
 	"github.com/gorilla/websocket"
 )
@@ -85,6 +86,8 @@ func main() {
 	config := shared.NewKafkaConfig(*topic, *consumerGroup, *host)
 
 	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
+
+	appdatabase.Start(5432, "kafka_uber", "localhost", "postgres", "password")
 
 	// Start consumers
 	fmt.Println("Starting...")

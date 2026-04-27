@@ -8,7 +8,7 @@ services:
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093 # <-- Changed to 'kafka'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       
       KAFKA_LISTENERS: INTERNAL://0.0.0.0:29092,EXTERNAL://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
@@ -16,7 +16,7 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
 
-      # THE SMOKING GUN: Allow the internal group coordinator to exist on 1 node
+      # Allow the internal group coordinator to exist on 1 node
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
   kafka-ui:
@@ -25,8 +25,21 @@ services:
     ports:
       - "8080:8080"
     environment:
-      # Tell the UI to connect using the INTERNAL listener
+      # Tells the UI to connect using the INTERNAL listener
       KAFKA_CLUSTERS_0_NAME: local-go-dev
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
     depends_on:
       - kafka
+
+  database:
+    image: postgres:16-alpine
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: kafka_uber
+    ports:
+      - "5432:5432"
+    #volumes:
+    #  - postgres_data:/var/lib/postgresql/data

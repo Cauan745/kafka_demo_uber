@@ -10,7 +10,6 @@ import (
 	"sync"
 
 	consumerapp "github.com/cauan745/trabalho_kafka/internal/app/consumer"
-	appdatabase "github.com/cauan745/trabalho_kafka/internal/app/database"
 	"github.com/cauan745/trabalho_kafka/internal/kafka/shared"
 	"github.com/gorilla/websocket"
 )
@@ -25,6 +24,7 @@ var (
 	clients   = make(map[*websocket.Conn]bool) // Connected clients
 	broadcast = make(chan []byte)              // Broadcast channel
 	mutex     = &sync.Mutex{}                  // Protect clients map
+
 )
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
@@ -76,6 +76,8 @@ func main() {
 	http.HandleFunc("/ws", wsHandler)
 	go handleMessages()
 
+	go StartHttpServer()
+
 	// Kafka
 	topic := flag.String("topic", "local_topic", "Kafka Topic Name")
 	consumerGroup := flag.String("consumerGroup", "local_cg", "Kafka Consumer Group Name")
@@ -86,9 +88,6 @@ func main() {
 	config := shared.NewKafkaConfig(*topic, *consumerGroup, *host)
 
 	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
-
-	db := appdatabase.New(5432, "kafka_uber", "localhost", "postgres", "password")
-	db.CreateUserTable()
 
 	// Start consumers
 	fmt.Println("Starting...")

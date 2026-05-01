@@ -22,8 +22,8 @@ run-bunch-producers:
 driver-logger:
 	go run cmd/consumer/driver_logger/driver_logger.go --consumerGroup="local_cg3"
 	
-	area-tracker:
+area-tracker:
 	go run cmd/consumer/area_tracker/area_tracker.go -consumerGroup="local_cg2"
 
-ws-server: start-dockers
-	go run cmd/consumer/server/server.go
+server: start-dockers
+	go run cmd/consumer/server/*

@@ -23,7 +23,7 @@ services:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
     ports:
-      - "8080:8080"
+      - "8008:8080"
     environment:
       # Tells the UI to connect using the INTERNAL listener
       KAFKA_CLUSTERS_0_NAME: local-go-dev

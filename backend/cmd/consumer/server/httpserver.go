@@ -5,12 +5,15 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
+	"github.com/cauan745/trabalho_kafka/internal/app/auth"
 	appdatabase "github.com/cauan745/trabalho_kafka/internal/app/database"
 )
 
 type HttpServer struct {
-	db appdatabase.Database
+	db       appdatabase.Database
+	jwtMaker auth.JWTMaker
 }
 
 func StartHttpServer() {
@@ -19,7 +22,9 @@ func StartHttpServer() {
 	db := appdatabase.New(5432, "kafka_uber", "localhost", "postgres", "password")
 	db.CreateUserTable()
 
-	s := HttpServer{*db}
+	jwtMaker := auth.NewJWTMaker("teste")
+
+	s := HttpServer{*db, *jwtMaker}
 
 	mux := http.NewServeMux()
 
@@ -53,8 +58,17 @@ func (s *HttpServer) userRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	token, err := s.jwtMaker.CreateToken(id, user.Name, false, 60*time.Minute)
+	if err != nil {
+		http.Error(w, "", 500)
+		return
+	}
+
 	w.WriteHeader(200)
-	fmt.Fprintf(w, `{id:"%d"}`, id)
+	fmt.Fprintf(w, `{
+		id:"%d"
+		token: "%s"
+	}`, id, token)
 }
 
 func (s *HttpServer) userLogin(w http.ResponseWriter, r *http.Request) {
@@ -67,10 +81,19 @@ func (s *HttpServer) userLogin(w http.ResponseWriter, r *http.Request) {
 
 	id, err := s.db.Login(user)
 	if err != nil {
+		http.Error(w, "invalid name or password", 500)
+		return
+	}
+
+	token, err := s.jwtMaker.CreateToken(id, user.Name, false, 60*time.Minute)
+	if err != nil {
 		http.Error(w, "", 500)
 		return
 	}
 
 	w.WriteHeader(200)
-	fmt.Fprintf(w, `{id:"%d"}`, id)
+	fmt.Fprintf(w, `{
+		id:"%d"
+		token: "%s"
+	}`, id, token)
 }

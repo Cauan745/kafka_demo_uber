@@ -33,8 +33,13 @@ func StartHttpServer() {
 		Handler: mux,
 	}
 
+	fs := http.FileServer(http.Dir("./static"))
+
 	mux.HandleFunc("POST /api/register", s.userRegister)
 	mux.HandleFunc("POST /api/login", s.userLogin)
+	mux.Handle("GET /app/", s.jwtMiddleware(fs))
+
+	mux.Handle("GET /", fs)
 
 	fmt.Println("HttpServer running on port", port)
 

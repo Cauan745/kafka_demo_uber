@@ -71,8 +71,8 @@ func (s *HttpServer) userRegister(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(200)
 	fmt.Fprintf(w, `{
-		id:"%d"
-		token: "%s"
+		"id":"%d",
+		"token": "%s"
 	}`, id, token)
 }
 
@@ -98,7 +98,7 @@ func (s *HttpServer) userLogin(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(200)
 	fmt.Fprintf(w, `{
-		id:"%d"
-		token: "%s"
+		"id":"%d",
+		"token": "%s"
 	}`, id, token)
 }

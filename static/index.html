@@ -5,7 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
 </head>
+
+  <script>
+  function registrar(){
+    let name = document.getElementById("name").value
+    let password = document.getElementById("password").value
+
+    let body = JSON.stringify({name, password})
+
+    console.log(body)
+    
+    fetch("http://localhost:8080/api/register",
+      {
+        method: "POST", 
+        body 
+      }
+    ).then(res => {
+        console.log(res) 
+        return res.json()
+      }
+    ).then(js => {
+        console.log(js)
+        redirectToApp()
+      }
+    )
+  }
+
+  function redirectToApp(){
+    window.location.assign("/app")
+  }
+</script>
+
 <body>
- <h1>Legal</h1> 
+  <h1>Registrar</h1> 
+  <input type="text" name="name" id="name">
+  <input type="password" name="password" id="password">
+  <button onclick="registrar()">Enviar</button>
 </body>
+
+
 </html>

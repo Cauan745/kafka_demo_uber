@@ -49,6 +49,21 @@ func StartHttpServer() {
 	}
 }
 
+func sendToken(w http.ResponseWriter, token string, duration time.Duration) {
+	cookie := &http.Cookie{
+		Name:     "session_token",
+		Value:    token,
+		Path:     "/",
+		Expires:  time.Now().Add(duration),
+		HttpOnly: true,
+		Secure:   false, // false to allow non-https connections
+		SameSite: http.SameSiteLaxMode,
+	}
+
+	http.SetCookie(w, cookie)
+	w.Write([]byte("Cookie has been set"))
+}
+
 func (s *HttpServer) userRegister(w http.ResponseWriter, r *http.Request) {
 	user := appdatabase.User{}
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -63,17 +78,15 @@ func (s *HttpServer) userRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := s.jwtMaker.CreateToken(id, user.Name, false, 60*time.Minute)
+	duration := 60 * time.Minute
+
+	token, err := s.jwtMaker.CreateToken(id, user.Name, false, duration)
 	if err != nil {
 		http.Error(w, "", 500)
 		return
 	}
 
-	w.WriteHeader(200)
-	fmt.Fprintf(w, `{
-		"id":"%d",
-		"token": "%s"
-	}`, id, token)
+	sendToken(w, token, duration)
 }
 
 func (s *HttpServer) userLogin(w http.ResponseWriter, r *http.Request) {
@@ -90,15 +103,13 @@ func (s *HttpServer) userLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := s.jwtMaker.CreateToken(id, user.Name, false, 60*time.Minute)
+	duration := 60 * time.Minute
+
+	token, err := s.jwtMaker.CreateToken(id, user.Name, false, duration)
 	if err != nil {
 		http.Error(w, "", 500)
 		return
 	}
 
-	w.WriteHeader(200)
-	fmt.Fprintf(w, `{
-		"id":"%d",
-		"token": "%s"
-	}`, id, token)
+	sendToken(w, token, duration)
 }

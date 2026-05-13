@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+  <script>
+  function login(){
+    let name = document.getElementById("name").value
+    let password = document.getElementById("password").value
+
+    let body = JSON.stringify({name, password})
+
+    console.log(body)
+    
+    fetch("http://localhost:8080/api/login",
+      {
+        method: "POST", 
+      }
+    ).then(res => {
+        console.log(res) 
+        return res.text()
+      }
+    ).then(js => {
+        console.log(js)
+        redirectToApp()
+      }
+    )
+  }
+
+  function redirectToApp(){
+    window.location.assign("/app")
+  }
+</script>
+
+<body>
+  <h1>Login</h1> 
+  <input type="text" name="name" id="name">
+  <input type="password" name="password" id="password">
+  <button onclick="login()">Enviar</button>
+</body>
+
+
+</html>

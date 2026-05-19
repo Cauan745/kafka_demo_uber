@@ -26,7 +26,7 @@ services:
       - "8008:8080"
     environment:
       # Tells the UI to connect using the INTERNAL listener
-      KAFKA_CLUSTERS_0_NAME: local-go-dev
+      KAFKA_CLUSTERS_0_NAME: local-go-dev 
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
     depends_on:
       - kafka
@@ -43,3 +43,29 @@ services:
       - "5432:5432"
     #volumes:
     #  - postgres_data:/var/lib/postgresql/data
+
+  server:
+    image: golang:latest
+    container_name: server
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      - DB_HOST=database
+    ports:
+      - "8000:8000"
+      - "8080:8080"
+    command: sh -c "go run cmd/consumer/server/*.go -host=kafka:29092"
+    depends_on:
+      - kafka
+      - database
+
+  producer:
+    image: golang:latest
+    container_name: producer
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: sh -c "go run cmd/producer/driver_tracker.go -host=kafka:29092"
+    depends_on:
+      - kafka

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/cauan745/trabalho_kafka/internal/app/auth"
@@ -19,7 +20,11 @@ type HttpServer struct {
 func StartHttpServer() {
 	port := ":8080"
 
-	db := appdatabase.New(5432, "kafka_uber", "localhost", "postgres", "password")
+	dbHost := os.Getenv("DB_HOST")
+	if dbHost == "" {
+		dbHost = "localhost"
+	}
+	db := appdatabase.New(5432, "kafka_uber", dbHost, "postgres", "password")
 	db.CreateUserTable()
 
 	jwtMaker := auth.NewJWTMaker("teste")

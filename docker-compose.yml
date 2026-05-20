@@ -19,17 +19,17 @@ services:
       # Allow the internal group coordinator to exist on 1 node
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    container_name: kafka-ui
-    ports:
-      - "8008:8080"
-    environment:
+  #kafka-ui:
+    #image: provectuslabs/kafka-ui:latest
+    #container_name: kafka-ui
+    #ports:
+    #  - "8008:8080"
+    #environment:
       # Tells the UI to connect using the INTERNAL listener
-      KAFKA_CLUSTERS_0_NAME: local-go-dev 
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
-    depends_on:
-      - kafka
+    #  KAFKA_CLUSTERS_0_NAME: local-go-dev 
+    #  KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+    #depends_on:
+    #  - kafka
 
   database:
     image: postgres:16-alpine

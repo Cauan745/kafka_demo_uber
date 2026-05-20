@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
-
+	consumerapp "github.com/cauan745/trabalho_kafka/internal/app/consumer"
 	producerapp "github.com/cauan745/trabalho_kafka/internal/app/producer"
 	"github.com/cauan745/trabalho_kafka/internal/kafka/producer"
 	"github.com/cauan745/trabalho_kafka/internal/kafka/shared"
@@ -36,8 +36,17 @@ func main() {
 
 	s := NewServer(*config)
 
+	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
+	consumerCh := make(chan string)
+
+	reqConfig := shared.NewKafkaConfig("ride_requests", *consumerGroup, *host)
+	err := consumerapp.NewConsumer(consumerCh, logger, *reqConfig)
+	if err != nil {
+		logger.Error("Failed to initialize consumer", "error", err)
+	}
+
 	// Start consumers
 	fmt.Println("Starting...")
 
-	producerapp.Start(s.producer, *driverQuantity)
+	producerapp.Start(s.producer, *driverQuantity, consumerCh)
 }

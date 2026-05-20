@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	consumerapp "github.com/cauan745/trabalho_kafka/internal/app/consumer"
+	"github.com/cauan745/trabalho_kafka/internal/kafka/producer"
 	"github.com/cauan745/trabalho_kafka/internal/kafka/shared"
 	"github.com/gorilla/websocket"
 )
@@ -76,8 +77,6 @@ func main() {
 	http.HandleFunc("/ws", wsHandler)
 	go handleMessages()
 
-	go StartHttpServer()
-
 	// Kafka
 	topic := flag.String("topic", "local_topic", "Kafka Topic Name")
 	consumerGroup := flag.String("consumerGroup", "local_cg", "Kafka Consumer Group Name")
@@ -86,8 +85,13 @@ func main() {
 	flag.Parse()
 
 	config := shared.NewKafkaConfig(*topic, *consumerGroup, *host)
-
 	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
+
+	// Ride requests producer
+	producerCfg := shared.NewKafkaConfig("ride_requests", *consumerGroup, *host)
+	rideProducer := producer.NewKafkaProducer("ride_requests", logger, *producerCfg)
+
+	go StartHttpServer(rideProducer)
 
 	// Start consumers
 	fmt.Println("Starting...")

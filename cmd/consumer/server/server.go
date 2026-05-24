@@ -79,7 +79,7 @@ func main() {
 
 	// Kafka
 	topic := flag.String("topic", "local_topic", "Kafka Topic Name")
-	consumerGroup := flag.String("consumerGroup", "local_cg", "Kafka Consumer Group Name")
+	consumerGroup := flag.String("consumerGroup", "local_cg_server", "Kafka Consumer Group Name")
 	host := flag.String("host", "localhost:9092", "Kafka Host Address ex: 'localhost:9092'")
 
 	flag.Parse()

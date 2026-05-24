@@ -24,7 +24,7 @@ func NewKafkaConsumer(msgCH chan<- string, logger *slog.Logger, cfg shared.Kafka
 	c, err := kafka.NewConsumer(&kafka.ConfigMap{
 		"bootstrap.servers": cfg.Host,
 		"group.id":          cfg.ConsumerGroup,
-		"auto.offset.reset": "earliest",
+		"auto.offset.reset": "latest",
 	})
 	if err != nil {
 		return nil, err

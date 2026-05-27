@@ -14,7 +14,7 @@
     </style>
 </head>
 <body>
-
+    <button onclick="startRide()" style="position: absolute; top: 10px; left: 10px; z-index: 1000;">Start Ride</button>
     <div id="map"></div>
 
     <script>
@@ -108,6 +108,29 @@
 
             }
 
+        }
+
+        function startRide() {
+            const lat = -8.77 + Math.random() * 0.02;
+            const lng = -63.91 + Math.random() * 0.03;
+
+            map.flyTo({
+                center: [lng, lat],
+                zoom: 15
+            });
+
+            fetch("/api/ride/start", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    latitude: lat,
+                    longitude: lng
+                })
+            }).then(res => {
+                console.log("Ride started");
+            }).catch(err => console.error(err));
         }
 
     connect();

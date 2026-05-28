@@ -19,6 +19,12 @@ services:
       # Allow the internal group coordinator to exist on 1 node
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
+    healthcheck:
+      test: ["CMD", "/opt/kafka/bin/kafka-broker-api-versions.sh", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   #kafka-ui:
     #image: provectuslabs/kafka-ui:latest
     #container_name: kafka-ui
@@ -41,6 +47,11 @@ services:
       POSTGRES_DB: kafka_uber
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d kafka_uber"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     #volumes:
     #  - postgres_data:/var/lib/postgresql/data
 
@@ -59,8 +70,10 @@ services:
       - "8080:8080"
     command: sh -c "go run cmd/consumer/server/*.go -host=kafka:29092"
     depends_on:
-      - kafka
-      - database
+      kafka:
+        condition: service_healthy
+      database:
+        condition: service_healthy
 
   producer:
     image: golang:latest
@@ -72,7 +85,8 @@ services:
       - go-build-cache:/root/.cache/go-build
     command: sh -c "go run cmd/producer/driver_tracker.go -host=kafka:29092"
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
 
 volumes:
   go-mod-cache:

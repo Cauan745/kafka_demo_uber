@@ -13,7 +13,7 @@ QUANTITY = 1
 
 producer:
 	@echo "Running with QUANTITY: $(QUANTITY)"
-	go run cmd/producer/driver_tracker.go -quantity=$(QUANTITY)
+	go run cmd/producer/driver_tracker.go -quantity=$(QUANTITY) -no-consumer
 
 run-bunch-producers:
 	@echo "Running with QUANTITY: $(QUANTITY)"

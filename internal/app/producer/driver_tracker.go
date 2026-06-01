@@ -21,8 +21,9 @@ func Start(producer *producer.KafkaProducer, driverQuantity int, consumerCh chan
 
 	go producerLoop(producerCh, producer)
 
-	go func() {
-		for msg := range consumerCh {
+	if consumerCh != nil {
+		go func() {
+			for msg := range consumerCh {
 			type RideRequest struct {
 				PassengerId float64 `json:"passengerId"`
 				Latitude    float64 `json:"latitude"`
@@ -55,7 +56,8 @@ func Start(producer *producer.KafkaProducer, driverQuantity int, consumerCh chan
 				producer.Produce(string(js))
 			}
 		}
-	}()
+		}()
+	}
 
 	for end := range endCh {
 		_ = end

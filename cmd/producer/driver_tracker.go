@@ -29,6 +29,7 @@ func main() {
 	consumerGroup := flag.String("consumerGroup", "local_cg", "Kafka Consumer Group Name")
 	host := flag.String("host", "localhost:9092", "Kafka Host Address ex: 'localhost:9092'")
 	driverQuantity := flag.Int("quantity", 1, "The quantity of drivers to simulate")
+	disableConsumer := flag.Bool("no-consumer", false, "Disable the kafka consumer for ride requests")
 
 	flag.Parse()
 
@@ -36,13 +37,16 @@ func main() {
 
 	s := NewServer(*config)
 
-	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
-	consumerCh := make(chan string)
+	var consumerCh chan string
+	if !*disableConsumer {
+		logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
+		consumerCh = make(chan string)
 
-	reqConfig := shared.NewKafkaConfig("ride_requests", *consumerGroup, *host)
-	err := consumerapp.NewConsumer(consumerCh, logger, *reqConfig)
-	if err != nil {
-		logger.Error("Failed to initialize consumer", "error", err)
+		reqConfig := shared.NewKafkaConfig("ride_requests", *consumerGroup, *host)
+		err := consumerapp.NewConsumer(consumerCh, logger, *reqConfig)
+		if err != nil {
+			logger.Error("Failed to initialize consumer", "error", err)
+		}
 	}
 
 	// Start consumers

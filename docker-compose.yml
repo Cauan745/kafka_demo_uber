@@ -52,9 +52,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    #volumes:
-    #  - postgres_data:/var/lib/postgresql/data
-
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
   server:
     image: golang:latest
     container_name: server
@@ -91,3 +90,4 @@ services:
 volumes:
   go-mod-cache:
   go-build-cache:
+  postgres_data:

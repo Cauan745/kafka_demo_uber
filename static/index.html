@@ -3,45 +3,102 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>Registrar - App Uber</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    main {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    label {
+      font-weight: bold;
+      color: #555;
+    }
+    input {
+      padding: 0.8rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    button {
+      padding: 0.8rem;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+  </style>
 </head>
+<body>
+  <main>
+    <h1>Registrar</h1> 
+    <form onsubmit="event.preventDefault(); registrar();">
+      <label for="name">Name</label>
+      <input type="text" name="name" id="name" required>
+      
+      <label for="password">Password</label>
+      <input type="password" name="password" id="password" required>
+      
+      <button type="submit">Enviar</button>
+    </form>
+  </main>
 
   <script>
-  function registrar(){
-    let name = document.getElementById("name").value
-    let password = document.getElementById("password").value
+    function registrar(){
+      let name = document.getElementById("name").value
+      let password = document.getElementById("password").value
 
-    let body = JSON.stringify({name, password})
+      let body = JSON.stringify({name, password})
 
-    console.log(body)
-    
-    fetch("http://localhost:8080/api/register",
-      {
-        method: "POST", 
-        body 
-      }
-    ).then(res => {
-        console.log(res) 
-        return res.text()
-      }
-    ).then(js => {
-        console.log(js)
-        redirectToApp()
-      }
-    )
-  }
+      console.log(body)
+      
+      fetch("http://localhost:8080/api/register",
+        {
+          method: "POST", 
+          body 
+        }
+      ).then(res => {
+          console.log(res) 
+          return res.text()
+        }
+      ).then(js => {
+          console.log(js)
+          redirectToApp()
+        }
+      ).catch(err => {
+          console.error("Registration failed:", err);
+      });
+    }
 
-  function redirectToApp(){
-    window.location.assign("/app")
-  }
-</script>
-
-<body>
-  <h1>Registrar</h1> 
-  <input type="text" name="name" id="name">
-  <input type="password" name="password" id="password">
-  <button onclick="registrar()">Enviar</button>
+    function redirectToApp(){
+      window.location.assign("/app")
+    }
+  </script>
 </body>
-
-
 </html>

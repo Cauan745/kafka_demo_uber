@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,33 +15,39 @@
       height: 100vh;
       margin: 0;
     }
+
     main {
       background: white;
       padding: 2rem;
       border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       width: 100%;
       max-width: 400px;
     }
+
     h1 {
       text-align: center;
       color: #333;
     }
+
     form {
       display: flex;
       flex-direction: column;
       gap: 1rem;
     }
+
     label {
       font-weight: bold;
       color: #555;
     }
+
     input {
       padding: 0.8rem;
       border: 1px solid #ccc;
       border-radius: 4px;
       font-size: 1rem;
     }
+
     button {
       padding: 0.8rem;
       background-color: #007bff;
@@ -50,54 +57,60 @@
       font-size: 1rem;
       cursor: pointer;
     }
+
     button:hover {
       background-color: #0056b3;
     }
   </style>
 </head>
+
 <body>
   <main>
-    <h1>Login</h1> 
+    <h1>Login</h1>
     <form onsubmit="event.preventDefault(); login();">
       <label for="name">Name</label>
       <input type="text" name="name" id="name" required>
-      
+
       <label for="password">Password</label>
       <input type="password" name="password" id="password" required>
-      
+
       <button type="submit">Enviar</button>
     </form>
   </main>
 
   <script>
-    function login(){
+    function login() {
       let name = document.getElementById("name").value
       let password = document.getElementById("password").value
 
-      let body = JSON.stringify({name, password})
+      let body = JSON.stringify({ name, password })
 
       console.log(body)
-      
+
       fetch("http://localhost:8080/api/login",
         {
-          method: "POST", 
+          method: "POST",
+          body
         }
       ).then(res => {
-          console.log(res) 
-          return res.text()
-        }
+        console.log(res)
+        if (!res.ok)
+          throw new Error(res.statusText)
+        return res.text()
+      }
       ).then(js => {
-          console.log(js)
-          redirectToApp()
-        }
+        console.log(js)
+        redirectToApp()
+      }
       ).catch(err => {
-          console.error("Login failed:", err);
+        console.error("Login failed:", err);
       });
     }
 
-    function redirectToApp(){
+    function redirectToApp() {
       window.location.assign("/app")
     }
   </script>
 </body>
+
 </html>

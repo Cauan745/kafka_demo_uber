@@ -5,78 +5,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - App Uber</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f9;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-
-    main {
-      background: white;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      max-width: 400px;
-    }
-
-    h1 {
-      text-align: center;
-      color: #333;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    label {
-      font-weight: bold;
-      color: #555;
-    }
-
-    input {
-      padding: 0.8rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 1rem;
-    }
-
-    button {
-      padding: 0.8rem;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-  </style>
+  <link rel="stylesheet" href="/styles.css">
 </head>
 
-<body>
-  <main>
+<body class="auth-layout">
+  <main class="auth-card">
     <h1>Login</h1>
-    <form onsubmit="event.preventDefault(); login();">
+    <form class="auth-form" onsubmit="event.preventDefault(); login();">
       <label for="name">Name</label>
       <input type="text" name="name" id="name" required>
 
       <label for="password">Password</label>
       <input type="password" name="password" id="password" required>
 
-      <button type="submit">Enviar</button>
+      <button type="submit" class="btn btn-primary">Enviar</button>
     </form>
-    <p style="text-align: center; margin-top: 15px; font-size: 0.9rem;">
+    <p class="auth-footer">
       <a href="/">Register</a>
     </p>
   </main>

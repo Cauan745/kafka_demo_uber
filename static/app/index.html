@@ -8,22 +8,20 @@
 
     <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
     <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css">
 
     <style>
         body {
             margin: 0;
             padding: 0;
         }
-
-        #map {
-            width: 100vw;
-            height: 100vh;
-        }
     </style>
 </head>
 
 <body>
-    <button onclick="startRide()" style="position: absolute; top: 10px; left: 10px; z-index: 1000;">Start Ride</button>
+    <div class="map-controls">
+        <button onclick="startRide()">Start Ride</button>
+    </div>
     <div id="map"></div>
 
     <script>

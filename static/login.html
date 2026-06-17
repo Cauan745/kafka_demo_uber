@@ -10,19 +10,23 @@
 
 <body class="auth-layout">
   <main class="auth-card">
-    <h1>Login</h1>
-    <form class="auth-form" onsubmit="event.preventDefault(); login();">
-      <label for="name">Name</label>
-      <input type="text" name="name" id="name" required>
+    <header>
+      <h1>Login</h1>
+    </header>
+    <section>
+      <form class="auth-form" onsubmit="event.preventDefault(); login();">
+        <label for="name">Name</label>
+        <input type="text" name="name" id="name" required>
 
-      <label for="password">Password</label>
-      <input type="password" name="password" id="password" required>
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" required>
 
-      <button type="submit" class="btn btn-primary">Enviar</button>
-    </form>
-    <p class="auth-footer">
+        <button type="submit" class="btn btn-primary">Enviar</button>
+      </form>
+    </section>
+    <footer class="auth-footer">
       <a href="/">Register</a>
-    </p>
+    </footer>
   </main>
 
   <script>

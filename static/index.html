@@ -10,16 +10,20 @@
 
 <body class="auth-layout">
   <main class="auth-card">
-    <h1>Registrar</h1>
-    <form class="auth-form" onsubmit="event.preventDefault(); registrar();">
-      <label for="name">Name</label>
-      <input type="text" name="name" id="name" required>
+    <header>
+      <h1>Registrar</h1>
+    </header>
+    <section>
+      <form class="auth-form" onsubmit="event.preventDefault(); registrar();">
+        <label for="name">Name</label>
+        <input type="text" name="name" id="name" required>
 
-      <label for="password">Password</label>
-      <input type="password" name="password" id="password" required>
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" required>
 
-      <button type="submit" class="btn btn-success">Enviar</button>
-    </form>
+        <button type="submit" class="btn btn-success">Enviar</button>
+      </form>
+    </section>
   </main>
 
   <script>

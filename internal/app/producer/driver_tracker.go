@@ -95,7 +95,10 @@ func producerLoop(producerCh chan app.Driver, producer *producer.KafkaProducer) 
 func generateTracker(producerCh chan app.Driver, producer *producer.KafkaProducer, endCh chan bool) {
 	// Producer code
 
-	passengerPos := app.Position{app.GenerateRandomLatitude(), app.GenerateRandomLongitude()}
+	passengerPos := app.Position{
+		Latitude:  app.GenerateRandomLatitude(),
+		Longitude: app.GenerateRandomLongitude(),
+	}
 
 	color, err := app.GenerateHexColor()
 	if err != nil {

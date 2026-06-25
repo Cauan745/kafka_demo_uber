@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+
 	consumerapp "github.com/cauan745/trabalho_kafka/internal/app/consumer"
 	producerapp "github.com/cauan745/trabalho_kafka/internal/app/producer"
 	"github.com/cauan745/trabalho_kafka/internal/kafka/producer"
@@ -53,4 +54,6 @@ func main() {
 	fmt.Println("Starting...")
 
 	producerapp.Start(s.producer, *driverQuantity, consumerCh)
+
+	fmt.Println("Producer finished")
 }

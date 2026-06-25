@@ -24,43 +24,53 @@ func Start(producer *producer.KafkaProducer, driverQuantity int, consumerCh chan
 	if consumerCh != nil {
 		go func() {
 			for msg := range consumerCh {
-			type RideRequest struct {
-				PassengerId float64 `json:"passengerId"`
-				Latitude    float64 `json:"latitude"`
-				Longitude   float64 `json:"longitude"`
-			}
-			var req RideRequest
-			err := json.Unmarshal([]byte(msg), &req)
-			if err != nil {
-				continue
-			}
+				type RideRequest struct {
+					PassengerId float64 `json:"passengerId"`
+					Latitude    float64 `json:"latitude"`
+					Longitude   float64 `json:"longitude"`
+				}
+				var req RideRequest
+				err := json.Unmarshal([]byte(msg), &req)
+				if err != nil {
+					continue
+				}
 
-			passengerPos := app.Position{Latitude: req.Latitude, Longitude: req.Longitude}
-			color, err := app.GenerateHexColor()
-			if err != nil {
-				color = "#FFFFFF"
-			}
+				passengerPos := app.Position{Latitude: req.Latitude, Longitude: req.Longitude}
+				color, err := app.GenerateHexColor()
+				if err != nil {
+					color = "#FFFFFF"
+				}
 
-			go app.IniciarTracking(producerCh, passengerPos, color, endCh)
+				go app.IniciarTracking(producerCh, passengerPos, color, endCh)
 
-			type Passenger struct {
-				Id        float64 `json:"passengerId"`
-				Latitude  float64 `json:"latitude"`
-				Longitude float64 `json:"longitude"`
-				Color     string  `json:"hexColor"`
-			}
+				type Passenger struct {
+					Id        float64 `json:"passengerId"`
+					Latitude  float64 `json:"latitude"`
+					Longitude float64 `json:"longitude"`
+					Color     string  `json:"hexColor"`
+				}
 
-			pas := Passenger{Id: req.PassengerId, Latitude: passengerPos.Latitude, Longitude: passengerPos.Longitude, Color: color}
-			js, err := json.Marshal(pas)
-			if err == nil {
-				producer.Produce(string(js))
+				pas := Passenger{Id: req.PassengerId, Latitude: passengerPos.Latitude, Longitude: passengerPos.Longitude, Color: color}
+				js, err := json.Marshal(pas)
+				if err == nil {
+					producer.Produce(string(js))
+				}
 			}
-		}
 		}()
 	}
 
 	for end := range endCh {
-		_ = end
+		if !end {
+			continue
+		}
+
+		driverQuantity--
+
+		if driverQuantity == 0 {
+			if consumerCh == nil {
+				return
+			}
+		}
 	}
 }
 

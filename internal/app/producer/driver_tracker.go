@@ -22,41 +22,7 @@ func Start(producer *producer.KafkaProducer, driverQuantity int, consumerCh chan
 	go producerLoop(producerCh, producer)
 
 	if consumerCh != nil {
-		go func() {
-			for msg := range consumerCh {
-				type RideRequest struct {
-					PassengerId float64 `json:"passengerId"`
-					Latitude    float64 `json:"latitude"`
-					Longitude   float64 `json:"longitude"`
-				}
-				var req RideRequest
-				err := json.Unmarshal([]byte(msg), &req)
-				if err != nil {
-					continue
-				}
-
-				passengerPos := app.Position{Latitude: req.Latitude, Longitude: req.Longitude}
-				color, err := app.GenerateHexColor()
-				if err != nil {
-					color = "#FFFFFF"
-				}
-
-				go app.IniciarTracking(producerCh, passengerPos, color, endCh)
-
-				type Passenger struct {
-					Id        float64 `json:"passengerId"`
-					Latitude  float64 `json:"latitude"`
-					Longitude float64 `json:"longitude"`
-					Color     string  `json:"hexColor"`
-				}
-
-				pas := Passenger{Id: req.PassengerId, Latitude: passengerPos.Latitude, Longitude: passengerPos.Longitude, Color: color}
-				js, err := json.Marshal(pas)
-				if err == nil {
-					producer.Produce(string(js))
-				}
-			}
-		}()
+		go startConsumer(producer, consumerCh, producerCh, endCh)
 	}
 
 	for end := range endCh {
@@ -122,4 +88,40 @@ func generateTracker(producerCh chan app.Driver, producer *producer.KafkaProduce
 	}
 
 	producer.Produce(string(js))
+}
+
+func startConsumer(producer *producer.KafkaProducer, consumerCh chan string, producerCh chan app.Driver, endCh chan bool) {
+	for msg := range consumerCh {
+		type RideRequest struct {
+			PassengerId float64 `json:"passengerId"`
+			Latitude    float64 `json:"latitude"`
+			Longitude   float64 `json:"longitude"`
+		}
+		var req RideRequest
+		err := json.Unmarshal([]byte(msg), &req)
+		if err != nil {
+			continue
+		}
+
+		passengerPos := app.Position{Latitude: req.Latitude, Longitude: req.Longitude}
+		color, err := app.GenerateHexColor()
+		if err != nil {
+			color = "#FFFFFF"
+		}
+
+		go app.IniciarTracking(producerCh, passengerPos, color, endCh)
+
+		type Passenger struct {
+			Id        float64 `json:"passengerId"`
+			Latitude  float64 `json:"latitude"`
+			Longitude float64 `json:"longitude"`
+			Color     string  `json:"hexColor"`
+		}
+
+		pas := Passenger{Id: req.PassengerId, Latitude: passengerPos.Latitude, Longitude: passengerPos.Longitude, Color: color}
+		js, err := json.Marshal(pas)
+		if err == nil {
+			producer.Produce(string(js))
+		}
+	}
 }

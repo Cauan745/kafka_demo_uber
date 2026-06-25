@@ -82,7 +82,7 @@ services:
       - .:/app
       - go-mod-cache:/go/pkg/mod
       - go-build-cache:/root/.cache/go-build
-    command: sh -c "go run cmd/producer/driver_tracker.go -host=kafka:29092"
+    command: sh -c "go run cmd/producer/driver_tracker.go -host=kafka:29092 -quantity=0"
     depends_on:
       kafka:
         condition: service_healthy

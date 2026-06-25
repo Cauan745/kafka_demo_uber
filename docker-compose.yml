@@ -87,6 +87,17 @@ services:
       kafka:
         condition: service_healthy
 
+  nginx:
+    image: nginx:stable-alpine
+    container_name: nginx_server
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: always
+    depends_on: 
+      - server
+
 volumes:
   go-mod-cache:
   go-build-cache:

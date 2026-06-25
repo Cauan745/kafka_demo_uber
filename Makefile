@@ -1,13 +1,8 @@
-start-dockers:
-	docker compose -f docker-compose.yml up -d
+start-containers:
+	docker compose up -d
 
-dev: start-dockers
-	go run cmd/main.go
-
-stop:
+stop-containers:
 	docker compose down
-
-restart-dev: stop dev
 
 QUANTITY = 1 
 
@@ -25,5 +20,5 @@ driver-logger:
 area-tracker:
 	go run cmd/consumer/area_tracker/area_tracker.go -consumerGroup="local_cg2"
 
-server: start-dockers
+server: start-containers
 	go run cmd/consumer/server/*

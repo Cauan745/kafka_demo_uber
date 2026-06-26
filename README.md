@@ -16,9 +16,9 @@ Simulação do sistema do Uber usando Kafka pra comunicação entre serviços. O
 docker compose up
 ```
 
-Acesse `http://localhost:8080` pra criar uma conta e depois fazer login.
+Acesse `http://localhost:80` pra criar uma conta e depois fazer login.
 
-A página do mapa fica em `http://localhost:8080/app/` (precisa estar logado).
+A página do mapa fica em `http://localhost:80/app/` (precisa estar logado).
 
 Pra simular motoristas sem o docker, o `QUANTITY` define quantos motoristas cada producer vai simular:
 

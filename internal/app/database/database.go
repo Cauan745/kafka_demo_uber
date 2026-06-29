@@ -46,3 +46,8 @@ func (c Config) Start() *sql.DB {
 
 	return db
 }
+
+func (db *Database) CreateTables() {
+	db.CreateUserTable()
+	db.CreateRidesTable()
+}

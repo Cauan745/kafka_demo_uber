@@ -1,6 +1,6 @@
-# Trabalho 4 - Kafka
+# Simulador Uber em Tempo Real
 
-Simulação do sistema do Uber usando Kafka pra comunicação entre serviços. O sistema rastreia motoristas em tempo real e mostra no mapa via WebSocket.
+Simulação do sistema do Uber usando Kafka pra comunicação entre serviços. O sistema rastreia motoristas em tempo real e mostra no mapa via WebSocket. Feito para a matéria de Introdução Ao Desenvolvimento Web do curso de Ciência da Computação da UNIR.
 
 ## Stack
 

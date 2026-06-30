@@ -38,3 +38,9 @@ func (db *Database) FinishRide(id int) error {
 	_, err := db.DB.Exec(query, id)
 	return err
 }
+
+func (db *Database) SetRideDriver(id int, driverId string) error {
+	query := `UPDATE rides SET driver_id = $2 WHERE id = $1 AND (driver_id IS NULL OR driver_id = '')`
+	_, err := db.DB.Exec(query, id, driverId)
+	return err
+}

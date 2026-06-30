@@ -23,7 +23,7 @@ type Position struct {
 }
 
 func IniciarTracking(ch chan<- Driver, passengerPosition Position, color string, rideId int, endCh chan<- bool) {
-	driverId := rand.Float64() * 1000000
+	driverId := float64(rand.Intn(1000000))
 
 	pos := Position{
 		Latitude:  GenerateRandomLatitude(),
@@ -35,7 +35,13 @@ func IniciarTracking(ch chan<- Driver, passengerPosition Position, color string,
 	//	panic(err.Error())
 	//}
 
-	// fmt.Println(string(js))
+	ch <- Driver{
+		DriverId: driverId,
+		RideId:   rideId,
+		Status:   "accepted",
+		HexColor: color,
+		Position: pos,
+	}
 
 	for {
 		time.Sleep(1 * time.Second)

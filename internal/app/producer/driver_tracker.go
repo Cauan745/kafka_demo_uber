@@ -80,7 +80,7 @@ func generateTracker(producerCh chan app.Driver, producer *producer.KafkaProduce
 		Color     string  `json:"hexColor"`
 	}
 
-	pas := Passenger{Id: rand.Float64() * 1000000, Latitude: passengerPos.Latitude, Longitude: passengerPos.Longitude, Color: color}
+	pas := Passenger{Id: float64(rand.Intn(1000000)), Latitude: passengerPos.Latitude, Longitude: passengerPos.Longitude, Color: color}
 
 	js, err := json.Marshal(pas)
 	if err != nil {

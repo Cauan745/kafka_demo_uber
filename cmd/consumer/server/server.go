@@ -114,15 +114,25 @@ func main() {
 		for msg := range consumerCh {
 			broadcast <- []byte(msg)
 
-			type FinishEvent struct {
-				RideId int    `json:"rideId"`
-				Status string `json:"status"`
+			type RideEvent struct {
+				RideId   int     `json:"rideId"`
+				Status   string  `json:"status"`
+				DriverId float64 `json:"driverId"`
 			}
-			var fe FinishEvent
-			if err := json.Unmarshal([]byte(msg), &fe); err == nil {
-				if fe.Status == "finished" {
-					db.FinishRide(fe.RideId)
+			var ev RideEvent
+			if err := json.Unmarshal([]byte(msg), &ev); err == nil {
+				if ev.Status == "finished" {
+					db.FinishRide(ev.RideId)
 				}
+
+				if ev.DriverId != 0 {
+					err := db.SetRideDriver(ev.RideId, fmt.Sprint(ev.DriverId))
+					if err != nil {
+						fmt.Println("Error updating driver:", err)
+					}
+				}
+			} else {
+				fmt.Println("JSON Unmarshal error:", err)
 			}
 		}
 	}()

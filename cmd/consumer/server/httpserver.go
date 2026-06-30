@@ -37,6 +37,7 @@ func StartHttpServer(db *appdatabase.Database, prod *producer.KafkaProducer) {
 	mux.HandleFunc("POST /api/register", s.userRegister)
 	mux.HandleFunc("POST /api/login", s.userLogin)
 	mux.Handle("POST /api/ride/start", s.jwtMiddleware(http.HandlerFunc(s.startRide)))
+	mux.Handle("GET /api/rides", s.jwtMiddleware(http.HandlerFunc(s.getRides)))
 	mux.Handle("GET /app/", s.jwtMiddleware(fs))
 
 	mux.Handle("GET /", fs)
@@ -162,4 +163,25 @@ func (s *HttpServer) startRide(w http.ResponseWriter, r *http.Request) {
 	s.producer.Produce(string(js))
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`{"status":"driver requested"}`))
+}
+
+func (s *HttpServer) getRides(w http.ResponseWriter, r *http.Request) {
+	userId, ok := r.Context().Value("user_id").(int)
+	if !ok {
+		http.Error(w, "Unauthorized", 401)
+		return
+	}
+
+	rides, err := s.db.GetRidesByPassengerId(fmt.Sprint(userId))
+	if err != nil {
+		http.Error(w, "Failed to get rides", 500)
+		return
+	}
+
+	if rides == nil {
+		rides = []appdatabase.Ride{}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(rides)
 }

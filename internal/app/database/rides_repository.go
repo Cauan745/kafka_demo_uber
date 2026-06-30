@@ -1,8 +1,18 @@
 package appdatabase
 
 import (
+	"database/sql"
 	"log"
+	"time"
 )
+
+type Ride struct {
+	ID          int
+	PassengerID string
+	DriverID    sql.NullString
+	CreatedAt   time.Time
+	FinishedAt  sql.NullTime
+}
 
 func (db *Database) CreateRidesTable() {
 	query := `CREATE TABLE IF NOT EXISTS rides (
@@ -43,4 +53,24 @@ func (db *Database) SetRideDriver(id int, driverId string) error {
 	query := `UPDATE rides SET driver_id = $2 WHERE id = $1 AND (driver_id IS NULL OR driver_id = '')`
 	_, err := db.DB.Exec(query, id, driverId)
 	return err
+}
+
+func (db *Database) GetRidesByPassengerId(passengerId string) ([]Ride, error) {
+	query := `SELECT id, passenger_id, driver_id, created_at, finished_at FROM rides WHERE passenger_id = $1 ORDER BY created_at DESC`
+	rows, err := db.DB.Query(query, passengerId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var rides []Ride
+	for rows.Next() {
+		var r Ride
+		err := rows.Scan(&r.ID, &r.PassengerID, &r.DriverID, &r.CreatedAt, &r.FinishedAt)
+		if err != nil {
+			return nil, err
+		}
+		rides = append(rides, r)
+	}
+	return rides, nil
 }

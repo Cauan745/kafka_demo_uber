@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Rides</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f4f4f9;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            text-decoration: none;
+            color: white;
+            background-color: #333;
+            padding: 10px 15px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="/app/" class="back-btn">Back to Map</a>
+        <h1>My Previous Rides</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Ride ID</th>
+                    <th>Driver ID</th>
+                    <th>Created At</th>
+                    <th>Finished At</th>
+                </tr>
+            </thead>
+            <tbody id="rides-table-body">
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch("/api/rides")
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Failed to fetch rides");
+                    }
+                    return response.json();
+                })
+                .then(rides => {
+                    const tbody = document.getElementById("rides-table-body");
+                    if (rides.length === 0) {
+                        tbody.innerHTML = "<tr><td colspan='4' style='text-align: center;'>No rides found</td></tr>";
+                        return;
+                    }
+
+                    rides.forEach(ride => {
+                        const tr = document.createElement("tr");
+
+                        let driverId = ride.DriverID.String;
+                        if (!ride.DriverID.Valid || !driverId) {
+                            driverId = "Searching...";
+                        }
+
+                        const createdDate = new Date(ride.CreatedAt).toLocaleString();
+
+                        let finishedDate = "In progress";
+                        if (ride.FinishedAt.Valid) {
+                            finishedDate = new Date(ride.FinishedAt.Time).toLocaleString();
+                        }
+
+                        tr.innerHTML = `
+                            <td>${ride.ID}</td>
+                            <td>${driverId}</td>
+                            <td>${createdDate}</td>
+                            <td>${finishedDate}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(error => {
+                    console.error("Error loading rides:", error);
+                    const tbody = document.getElementById("rides-table-body");
+                    tbody.innerHTML = "<tr><td colspan='4' style='text-align: center; color: red;'>Error loading rides</td></tr>";
+                });
+        });
+    </script>
+</body>
+
+</html>

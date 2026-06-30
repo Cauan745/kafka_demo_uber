@@ -2,6 +2,7 @@ package appdatabase
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"time"
 )
@@ -78,7 +79,20 @@ func (db *Database) GetRidesByPassengerId(passengerId string) ([]Ride, error) {
 }
 
 func (db *Database) SoftDeleteRide(id int, passengerId string) error {
-	query := `UPDATE rides SET deleted_at = CURRENT_TIMESTAMP WHERE id = $1 AND passenger_id = $2`
-	_, err := db.DB.Exec(query, id, passengerId)
-	return err
+	query := `UPDATE rides SET deleted_at = CURRENT_TIMESTAMP WHERE id = $1 AND passenger_id = $2 AND finished_at IS NOT NULL`
+	result, err := db.DB.Exec(query, id, passengerId)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return errors.New("ride not found, already deleted, or is still ongoing")
+	}
+
+	return nil
 }

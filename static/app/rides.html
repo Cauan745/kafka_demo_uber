@@ -95,16 +95,22 @@
                         const createdDate = new Date(ride.CreatedAt).toLocaleString();
 
                         let finishedDate = "In progress";
+                        let isOngoing = true;
                         if (ride.FinishedAt.Valid) {
                             finishedDate = new Date(ride.FinishedAt.Time).toLocaleString();
+                            isOngoing = false;
                         }
+
+                        let deleteBtn = isOngoing 
+                            ? `<button disabled style="color: gray; cursor: not-allowed;">Delete</button>` 
+                            : `<button onclick="deleteRide(${ride.ID})" style="color: red; cursor: pointer;">Delete</button>`;
 
                         tr.innerHTML = `
                             <td>${ride.ID}</td>
                             <td>${driverId}</td>
                             <td>${createdDate}</td>
                             <td>${finishedDate}</td>
-                            <td><button onclick="deleteRide(${ride.ID})" style="color: red; cursor: pointer;">Delete</button></td>
+                            <td>${deleteBtn}</td>
                         `;
                         tbody.appendChild(tr);
                     });

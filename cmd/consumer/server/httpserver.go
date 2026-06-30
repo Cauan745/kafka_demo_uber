@@ -39,6 +39,7 @@ func StartHttpServer(db *appdatabase.Database, prod *producer.KafkaProducer) {
 	mux.Handle("POST /api/ride/start", s.jwtMiddleware(http.HandlerFunc(s.startRide)))
 	mux.Handle("GET /api/rides", s.jwtMiddleware(http.HandlerFunc(s.getRides)))
 	mux.Handle("DELETE /api/rides/{id}", s.jwtMiddleware(http.HandlerFunc(s.deleteRide)))
+	mux.Handle("PATCH /api/rides/{id}/rating", s.jwtMiddleware(http.HandlerFunc(s.updateRideRating)))
 	mux.Handle("GET /app/", s.jwtMiddleware(fs))
 
 	mux.Handle("GET /", fs)
@@ -211,4 +212,45 @@ func (s *HttpServer) deleteRide(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`{"status":"success"}`))
 }
+
+func (s *HttpServer) updateRideRating(w http.ResponseWriter, r *http.Request) {
+	userId, ok := r.Context().Value("user_id").(int)
+	if !ok {
+		http.Error(w, "Unauthorized", 401)
+		return
+	}
+
+	idStr := r.PathValue("id")
+	var id int
+	_, err := fmt.Sscanf(idStr, "%d", &id)
+	if err != nil {
+		http.Error(w, "Invalid ride ID", 400)
+		return
+	}
+
+	var reqBody struct {
+		Rating int `json:"rating"`
+	}
+
+	err = json.NewDecoder(r.Body).Decode(&reqBody)
+	if err != nil {
+		http.Error(w, "Invalid JSON", 400)
+		return
+	}
+
+	if reqBody.Rating < 1 || reqBody.Rating > 5 {
+		http.Error(w, "Rating must be between 1 and 5", 400)
+		return
+	}
+
+	err = s.db.UpdateRideRating(id, fmt.Sprint(userId), reqBody.Rating)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"status":"success"}`))
+}
+
 

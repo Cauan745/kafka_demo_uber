@@ -14,6 +14,7 @@ type Ride struct {
 	CreatedAt   time.Time
 	FinishedAt  sql.NullTime
 	DeletedAt   sql.NullTime
+	Rating      sql.NullInt16
 }
 
 func (db *Database) CreateRidesTable() {
@@ -23,7 +24,8 @@ func (db *Database) CreateRidesTable() {
 		driver_id VARCHAR(100),
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		finished_at TIMESTAMP,
-		deleted_at TIMESTAMP
+		deleted_at TIMESTAMP,
+		rating INT
 	);`
 
 	_, err := db.DB.Exec(query)
@@ -59,7 +61,7 @@ func (db *Database) SetRideDriver(id int, driverId string) error {
 }
 
 func (db *Database) GetRidesByPassengerId(passengerId string) ([]Ride, error) {
-	query := `SELECT id, passenger_id, driver_id, created_at, finished_at, deleted_at FROM rides WHERE passenger_id = $1 AND deleted_at IS NULL ORDER BY created_at DESC`
+	query := `SELECT id, passenger_id, driver_id, created_at, finished_at, deleted_at, rating FROM rides WHERE passenger_id = $1 AND deleted_at IS NULL ORDER BY created_at DESC`
 	rows, err := db.DB.Query(query, passengerId)
 	if err != nil {
 		return nil, err
@@ -69,7 +71,7 @@ func (db *Database) GetRidesByPassengerId(passengerId string) ([]Ride, error) {
 	var rides []Ride
 	for rows.Next() {
 		var r Ride
-		err := rows.Scan(&r.ID, &r.PassengerID, &r.DriverID, &r.CreatedAt, &r.FinishedAt, &r.DeletedAt)
+		err := rows.Scan(&r.ID, &r.PassengerID, &r.DriverID, &r.CreatedAt, &r.FinishedAt, &r.DeletedAt, &r.Rating)
 		if err != nil {
 			return nil, err
 		}
@@ -92,6 +94,25 @@ func (db *Database) SoftDeleteRide(id int, passengerId string) error {
 
 	if rowsAffected == 0 {
 		return errors.New("ride not found, already deleted, or is still ongoing")
+	}
+
+	return nil
+}
+
+func (db *Database) UpdateRideRating(id int, passengerId string, rating int) error {
+	query := `UPDATE rides SET rating = $3 WHERE id = $1 AND passenger_id = $2 AND finished_at IS NOT NULL AND deleted_at IS NULL`
+	result, err := db.DB.Exec(query, id, passengerId, rating)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return errors.New("ride not found, not finished, or deleted")
 	}
 
 	return nil

@@ -38,6 +38,7 @@ func StartHttpServer(db *appdatabase.Database, prod *producer.KafkaProducer) {
 	mux.HandleFunc("POST /api/login", s.userLogin)
 	mux.Handle("POST /api/ride/start", s.jwtMiddleware(http.HandlerFunc(s.startRide)))
 	mux.Handle("GET /api/rides", s.jwtMiddleware(http.HandlerFunc(s.getRides)))
+	mux.Handle("DELETE /api/rides/{id}", s.jwtMiddleware(http.HandlerFunc(s.deleteRide)))
 	mux.Handle("GET /app/", s.jwtMiddleware(fs))
 
 	mux.Handle("GET /", fs)
@@ -185,3 +186,29 @@ func (s *HttpServer) getRides(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(rides)
 }
+
+func (s *HttpServer) deleteRide(w http.ResponseWriter, r *http.Request) {
+	userId, ok := r.Context().Value("user_id").(int)
+	if !ok {
+		http.Error(w, "Unauthorized", 401)
+		return
+	}
+
+	idStr := r.PathValue("id")
+	var id int
+	_, err := fmt.Sscanf(idStr, "%d", &id)
+	if err != nil {
+		http.Error(w, "Invalid ride ID", 400)
+		return
+	}
+
+	err = s.db.SoftDeleteRide(id, fmt.Sprint(userId))
+	if err != nil {
+		http.Error(w, "Failed to delete ride", 500)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"status":"success"}`))
+}
+

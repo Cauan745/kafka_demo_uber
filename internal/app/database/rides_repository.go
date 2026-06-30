@@ -12,6 +12,7 @@ type Ride struct {
 	DriverID    sql.NullString
 	CreatedAt   time.Time
 	FinishedAt  sql.NullTime
+	DeletedAt   sql.NullTime
 }
 
 func (db *Database) CreateRidesTable() {
@@ -20,7 +21,8 @@ func (db *Database) CreateRidesTable() {
 		passenger_id VARCHAR(100),
 		driver_id VARCHAR(100),
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-		finished_at TIMESTAMP
+		finished_at TIMESTAMP,
+		deleted_at TIMESTAMP
 	);`
 
 	_, err := db.DB.Exec(query)
@@ -56,7 +58,7 @@ func (db *Database) SetRideDriver(id int, driverId string) error {
 }
 
 func (db *Database) GetRidesByPassengerId(passengerId string) ([]Ride, error) {
-	query := `SELECT id, passenger_id, driver_id, created_at, finished_at FROM rides WHERE passenger_id = $1 ORDER BY created_at DESC`
+	query := `SELECT id, passenger_id, driver_id, created_at, finished_at, deleted_at FROM rides WHERE passenger_id = $1 AND deleted_at IS NULL ORDER BY created_at DESC`
 	rows, err := db.DB.Query(query, passengerId)
 	if err != nil {
 		return nil, err
@@ -66,11 +68,17 @@ func (db *Database) GetRidesByPassengerId(passengerId string) ([]Ride, error) {
 	var rides []Ride
 	for rows.Next() {
 		var r Ride
-		err := rows.Scan(&r.ID, &r.PassengerID, &r.DriverID, &r.CreatedAt, &r.FinishedAt)
+		err := rows.Scan(&r.ID, &r.PassengerID, &r.DriverID, &r.CreatedAt, &r.FinishedAt, &r.DeletedAt)
 		if err != nil {
 			return nil, err
 		}
 		rides = append(rides, r)
 	}
 	return rides, nil
+}
+
+func (db *Database) SoftDeleteRide(id int, passengerId string) error {
+	query := `UPDATE rides SET deleted_at = CURRENT_TIMESTAMP WHERE id = $1 AND passenger_id = $2`
+	_, err := db.DB.Exec(query, id, passengerId)
+	return err
 }

@@ -60,6 +60,7 @@
                     <th>Driver ID</th>
                     <th>Created At</th>
                     <th>Finished At</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody id="rides-table-body">
@@ -103,6 +104,7 @@
                             <td>${driverId}</td>
                             <td>${createdDate}</td>
                             <td>${finishedDate}</td>
+                            <td><button onclick="deleteRide(${ride.ID})" style="color: red; cursor: pointer;">Delete</button></td>
                         `;
                         tbody.appendChild(tr);
                     });
@@ -110,9 +112,28 @@
                 .catch(error => {
                     console.error("Error loading rides:", error);
                     const tbody = document.getElementById("rides-table-body");
-                    tbody.innerHTML = "<tr><td colspan='4' style='text-align: center; color: red;'>Error loading rides</td></tr>";
+                    tbody.innerHTML = "<tr><td colspan='5' style='text-align: center; color: red;'>Error loading rides</td></tr>";
                 });
         });
+
+        function deleteRide(id) {
+            if (!confirm("Are you sure you want to delete this ride?")) return;
+
+            fetch(`/api/rides/${id}`, {
+                method: "DELETE"
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert("Failed to delete ride");
+                }
+            })
+            .catch(error => {
+                console.error("Error deleting ride:", error);
+                alert("Error deleting ride");
+            });
+        }
     </script>
 </body>
 

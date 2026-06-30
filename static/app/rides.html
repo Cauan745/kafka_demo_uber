@@ -60,6 +60,7 @@
                     <th>Driver ID</th>
                     <th>Created At</th>
                     <th>Finished At</th>
+                    <th>Rating</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -80,7 +81,7 @@
                 .then(rides => {
                     const tbody = document.getElementById("rides-table-body");
                     if (rides.length === 0) {
-                        tbody.innerHTML = "<tr><td colspan='4' style='text-align: center;'>No rides found</td></tr>";
+                        tbody.innerHTML = "<tr><td colspan='6' style='text-align: center;'>No rides found</td></tr>";
                         return;
                     }
 
@@ -101,15 +102,32 @@
                             isOngoing = false;
                         }
 
-                        let deleteBtn = isOngoing 
-                            ? `<button disabled style="color: gray; cursor: not-allowed;">Delete</button>` 
+                        let deleteBtn = isOngoing
+                            ? `<button disabled style="color: gray; cursor: not-allowed;">Delete</button>`
                             : `<button onclick="deleteRide(${ride.ID})" style="color: red; cursor: pointer;">Delete</button>`;
+
+                        let currentRating = "";
+                        if (ride.Rating && ride.Rating.Valid) {
+                            currentRating = ride.Rating.Int16;
+                        }
+
+                        let ratingHtml = "N/A";
+                        if (!isOngoing) {
+                            let selectHtml = `<select id="rating-${ride.ID}">`;
+                            if (currentRating === "") selectHtml += `<option value="0" disabled selected hidden>Rate</option>`;
+                            for (let i = 1; i <= 5; i++) {
+                                selectHtml += `<option value="${i}" ${currentRating === i ? 'selected' : ''}>${i} Stars</option>`;
+                            }
+                            selectHtml += `</select> <button onclick="updateRating(${ride.ID})" style="cursor: pointer;">Save</button>`;
+                            ratingHtml = selectHtml;
+                        }
 
                         tr.innerHTML = `
                             <td>${ride.ID}</td>
                             <td>${driverId}</td>
                             <td>${createdDate}</td>
                             <td>${finishedDate}</td>
+                            <td>${ratingHtml}</td>
                             <td>${deleteBtn}</td>
                         `;
                         tbody.appendChild(tr);
@@ -118,7 +136,7 @@
                 .catch(error => {
                     console.error("Error loading rides:", error);
                     const tbody = document.getElementById("rides-table-body");
-                    tbody.innerHTML = "<tr><td colspan='5' style='text-align: center; color: red;'>Error loading rides</td></tr>";
+                    tbody.innerHTML = "<tr><td colspan='6' style='text-align: center; color: red;'>Error loading rides</td></tr>";
                 });
         });
 
@@ -128,17 +146,45 @@
             fetch(`/api/rides/${id}`, {
                 method: "DELETE"
             })
-            .then(response => {
-                if (response.ok) {
-                    location.reload();
-                } else {
-                    alert("Failed to delete ride");
-                }
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert("Failed to delete ride");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error deleting ride:", error);
+                    alert("Error deleting ride");
+                });
+        }
+
+        function updateRating(id) {
+            const select = document.getElementById(`rating-${id}`);
+            const rating = parseInt(select.value, 10);
+            if (!rating || rating < 1 || rating > 5) {
+                alert("Please select a valid rating.");
+                return;
+            }
+
+            fetch(`/api/rides/${id}/rating`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ rating: rating })
             })
-            .catch(error => {
-                console.error("Error deleting ride:", error);
-                alert("Error deleting ride");
-            });
+                .then(response => {
+                    if (response.ok) {
+                        alert("Rating updated successfully!");
+                    } else {
+                        alert("Failed to update rating");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error updating rating:", error);
+                    alert("Error updating rating");
+                });
         }
     </script>
 </body>

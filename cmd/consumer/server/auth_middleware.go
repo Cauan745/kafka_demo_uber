@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"net/http"
 )
 
@@ -22,13 +23,15 @@ func (s HttpServer) jwtMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		err = s.jwtMaker.VerifyToken(cookie.Value)
+		claims, err := s.jwtMaker.GetTokenClaims(cookie.Value)
 		if err != nil {
 			//http.Error(w, "invalid token", 400)
 			http.Redirect(w, r, "/login.html", http.StatusSeeOther)
 			return
 		}
 
-		next.ServeHTTP(w, r)
+		ctx := r.Context()
+		ctx = context.WithValue(ctx, "user_id", claims.Id)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

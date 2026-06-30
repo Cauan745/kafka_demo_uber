@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/cauan745/trabalho_kafka/internal/app/auth"
@@ -19,15 +18,8 @@ type HttpServer struct {
 	producer *producer.KafkaProducer
 }
 
-func StartHttpServer(prod *producer.KafkaProducer) {
+func StartHttpServer(db *appdatabase.Database, prod *producer.KafkaProducer) {
 	port := ":8080"
-
-	dbHost := os.Getenv("DB_HOST")
-	if dbHost == "" {
-		dbHost = "localhost"
-	}
-	db := appdatabase.New(5432, "kafka_uber", dbHost, "postgres", "password")
-	db.CreateUserTable()
 
 	jwtMaker := auth.NewJWTMaker("teste")
 
@@ -135,14 +127,28 @@ func (s *HttpServer) startRide(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userId, ok := r.Context().Value("user_id").(int)
+	if !ok {
+		http.Error(w, "Unauthorized", 401)
+		return
+	}
+
+	rideId, err := s.db.NewRide(fmt.Sprint(userId), "")
+	if err != nil {
+		http.Error(w, "Failed to create ride", 500)
+		return
+	}
+
 	type Passenger struct {
 		PassengerId float64 `json:"passengerId"`
+		RideId      int     `json:"rideId"`
 		Latitude    float64 `json:"latitude"`
 		Longitude   float64 `json:"longitude"`
 	}
 
 	pas := Passenger{
-		PassengerId: float64(time.Now().UnixNano()),
+		PassengerId: float64(userId),
+		RideId:      rideId,
 		Latitude:    req.Latitude,
 		Longitude:   req.Longitude,
 	}

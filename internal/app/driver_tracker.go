@@ -11,6 +11,8 @@ import (
 
 type Driver struct {
 	DriverId float64  `json:"driverId"`
+	RideId   int      `json:"rideId"`
+	Status   string   `json:"status"`
 	HexColor string   `json:"hexColor"`
 	Position Position `json:"position"`
 }
@@ -20,7 +22,7 @@ type Position struct {
 	Longitude float64 `json:"longitude"`
 }
 
-func IniciarTracking(ch chan<- Driver, passengerPosition Position, color string, endCh chan<- bool) {
+func IniciarTracking(ch chan<- Driver, passengerPosition Position, color string, rideId int, endCh chan<- bool) {
 	driverId := rand.Float64() * 1000000
 
 	pos := Position{
@@ -42,11 +44,19 @@ func IniciarTracking(ch chan<- Driver, passengerPosition Position, color string,
 
 		ch <- Driver{
 			DriverId: driverId,
+			RideId:   rideId,
 			HexColor: color,
 			Position: pos,
 		}
 
 		if end {
+			ch <- Driver{
+				DriverId: driverId,
+				RideId:   rideId,
+				Status:   "finished",
+				HexColor: color,
+				Position: pos,
+			}
 			endCh <- true
 			return
 		}

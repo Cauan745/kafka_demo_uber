@@ -71,7 +71,7 @@ func generateTracker(producerCh chan app.Driver, producer *producer.KafkaProduce
 		color = "#FFFFFF"
 	}
 
-	go app.IniciarTracking(producerCh, passengerPos, color, endCh)
+	go app.IniciarTracking(producerCh, passengerPos, color, 0, endCh)
 
 	type Passenger struct {
 		Id        float64 `json:"passengerId"`
@@ -94,6 +94,7 @@ func startConsumer(producer *producer.KafkaProducer, consumerCh chan string, pro
 	for msg := range consumerCh {
 		type RideRequest struct {
 			PassengerId float64 `json:"passengerId"`
+			RideId      int     `json:"rideId"`
 			Latitude    float64 `json:"latitude"`
 			Longitude   float64 `json:"longitude"`
 		}
@@ -109,7 +110,7 @@ func startConsumer(producer *producer.KafkaProducer, consumerCh chan string, pro
 			color = "#FFFFFF"
 		}
 
-		go app.IniciarTracking(producerCh, passengerPos, color, endCh)
+		go app.IniciarTracking(producerCh, passengerPos, color, req.RideId, endCh)
 
 		type Passenger struct {
 			Id        float64 `json:"passengerId"`

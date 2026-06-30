@@ -12,7 +12,7 @@ type JWTMaker struct {
 	secretKey string
 }
 
-type claims struct {
+type Claims struct {
 	Id   int    `json:"id"`
 	Name string `json:"name"`
 	jwt.RegisteredClaims
@@ -22,9 +22,9 @@ func NewJWTMaker(secretKey string) *JWTMaker {
 	return &JWTMaker{secretKey}
 }
 
-func CreateClaim(id int, name string, duration time.Duration) claims {
+func CreateClaim(id int, name string, duration time.Duration) Claims {
 	tokenId, _ := uuid.NewRandom()
-	return claims{
+	return Claims{
 		Id:   id,
 		Name: name,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -60,4 +60,17 @@ func (maker *JWTMaker) VerifyToken(tokenStr string) error {
 	})
 
 	return err
+}
+
+func (maker *JWTMaker) GetTokenClaims(tokenStr string) (*Claims, error) {
+	c := &Claims{}
+	_, err := jwt.ParseWithClaims(tokenStr, c, func(token *jwt.Token) (interface{}, error) {
+		_, ok := token.Method.(*jwt.SigningMethodHMAC)
+		if !ok {
+			return nil, fmt.Errorf("invalid token signing method")
+		}
+		return []byte(maker.secretKey), nil
+	})
+
+	return c, err
 }

@@ -2,6 +2,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log/slog"
@@ -10,6 +11,7 @@ import (
 	"sync"
 
 	consumerapp "github.com/cauan745/trabalho_kafka/internal/app/consumer"
+	appdatabase "github.com/cauan745/trabalho_kafka/internal/app/database"
 	"github.com/cauan745/trabalho_kafka/internal/kafka/producer"
 	"github.com/cauan745/trabalho_kafka/internal/kafka/shared"
 	"github.com/gorilla/websocket"
@@ -87,11 +89,17 @@ func main() {
 	config := shared.NewKafkaConfig(*topic, *consumerGroup, *host)
 	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
 
-	// Ride requests producer
 	producerCfg := shared.NewKafkaConfig("ride_requests", *consumerGroup, *host)
 	rideProducer := producer.NewKafkaProducer("ride_requests", logger, *producerCfg)
 
-	go StartHttpServer(rideProducer)
+	dbHost := os.Getenv("DB_HOST")
+	if dbHost == "" {
+		dbHost = "localhost"
+	}
+	db := appdatabase.New(5432, "kafka_uber", dbHost, "postgres", "password")
+	db.CreateTables()
+
+	go StartHttpServer(db, rideProducer)
 
 	// Start consumers
 	fmt.Println("Starting...")
@@ -105,6 +113,17 @@ func main() {
 	go func() {
 		for msg := range consumerCh {
 			broadcast <- []byte(msg)
+
+			type FinishEvent struct {
+				RideId int    `json:"rideId"`
+				Status string `json:"status"`
+			}
+			var fe FinishEvent
+			if err := json.Unmarshal([]byte(msg), &fe); err == nil {
+				if fe.Status == "finished" {
+					db.FinishRide(fe.RideId)
+				}
+			}
 		}
 	}()
 
